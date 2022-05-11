@@ -1,13 +1,13 @@
 let params = new URL(document.location).searchParams;
 let id = params.get("id");
-console.log(id)
+let modify = false;
+let newArticle = false;
 
 let url = `http://localhost:3000/api/products/${id}`
 
 fetch(url)
     .then((response) =>
         response.json().then((data) => {
-            console.log(data);
             const { imageUrl, name, price, description, colors, altTxt } = data;
             document.querySelector('.item__img').innerHTML =
                 `<img src="${imageUrl}" alt="${altTxt}"></img>`
@@ -18,10 +18,9 @@ fetch(url)
                 document.querySelector('#colors').innerHTML +=
                     `<option value="${color}">${color}</option>`
             }
-            document.querySelector('#addToCart').addEventListener("click", function() {
+            document.querySelector('#addToCart').addEventListener("click", function () {
                 let color = document.querySelector('#colors');
                 let quantity = document.querySelector('#quantity');
-                console.log(color.value, quantity.value)
 
                 let produit = {
                     id: id,
@@ -34,11 +33,40 @@ fetch(url)
                     quantity: quantity.value,
 
                 }
+                let produitLocalStorage = JSON.parse(localStorage.getItem("product"));
 
-                console.log(produit)
+                function addProductOnLocalStorage() {
+                    produitLocalStorage.push(produit)
+                    localStorage.setItem("product", JSON.stringify(produitLocalStorage))
+                }
+
+
+                if (produitLocalStorage) {
+                    produitLocalStorage = produitLocalStorage.map(el => {
+                        if (el.id == produit.id && el.color == produit.color) {
+                            let newNumber = parseInt(el.quantity) + parseInt(produit.quantity);
+                            el.quantity = String(newNumber);
+                            modify = true;
+                            return el;
+                        } else if (el.color !== produit.color && el.id == produit.id) {
+                            newArticle = true;
+                            return el;
+                        }
+                    })
+                    if (modify == true) {
+                        localStorage.setItem("product", JSON.stringify(produitLocalStorage));
+                        modify = false;
+                    } else if (newArticle == true) {
+                        addProductOnLocalStorage();
+                        newArticle = false;
+                    }
+
+                } else {
+                    produitLocalStorage = [];
+                    addProductOnLocalStorage();
+                }
             });
         }))
     .catch((error) => {
         console.log(error);
     });
-
