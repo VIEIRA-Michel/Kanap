@@ -33,6 +33,7 @@ fetch(url)
                     quantity: quantity.value,
 
                 }
+                console.log(produit.color);
                 let produitLocalStorage = JSON.parse(localStorage.getItem("product"));
 
                 function addProductOnLocalStorage() {
@@ -41,7 +42,9 @@ fetch(url)
                 }
 
 
-                if (produitLocalStorage) {
+                if (produit.color == "" || produit.quantity < 1 ) {
+                    alert("Merci de remplir tous les champs");
+                } else if (produitLocalStorage) {
                     produitLocalStorage = produitLocalStorage.map(el => {
                         if (el.id == produit.id && el.color == produit.color) {
                             let newNumber = parseInt(el.quantity) + parseInt(produit.quantity);
