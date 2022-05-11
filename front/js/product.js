@@ -51,10 +51,10 @@ fetch(url)
                             el.quantity = String(newNumber);
                             modify = true;
                             return el;
-                        } else if (el.color !== produit.color && el.id == produit.id) {
+                        } else if ((el.color !== produit.color && el.id == produit.id) || (el.id !== produit.id)) {
                             newArticle = true;
                             return el;
-                        }
+                        } 
                     })
                     if (modify == true) {
                         localStorage.setItem("product", JSON.stringify(produitLocalStorage));
