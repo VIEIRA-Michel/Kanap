@@ -1,7 +1,9 @@
 let panier = JSON.parse(localStorage.getItem("product"));
 console.log(panier);
+let i = 1
 
-for(article of panier) {
+for (article of panier) {
+    i++
     document.querySelector('#cart__items').innerHTML += `
     <article class="cart__item" data-id="{product-ID}" data-color="{product-color}">
                 <div class="cart__item__img">
@@ -24,9 +26,11 @@ for(article of panier) {
                   </div>
                 </div>
               </article>`
+              // i = String(i);
+            // let evenement = document.querySelector(`#input-${i}`).addEventListener('change', (event) => {
+            //       console.log('ça marche!!')
+            //   })
 }
-
-
 
 
 
