@@ -45,7 +45,7 @@ for (el of changeQuantity) {
     let cibleColor = e.target.parentElement.parentElement.parentElement.children[0].children[1].innerText;
     panier = panier.map(element => {
       if (element.name == cibleName && element.color == cibleColor) {
-        let newQuantity =  parseInt(e.target.value);
+        let newQuantity = parseInt(e.target.value);
         element.quantity = String(newQuantity);
         bool = true;
         return element;
@@ -66,7 +66,7 @@ for (el of buttonDelete) {
   el.addEventListener('click', (e => {
     let cibleName = e.target.parentElement.parentElement.parentElement.children[0].children[0].innerText;
     let cibleColor = e.target.parentElement.parentElement.parentElement.children[0].children[1].innerText;
-    
+
     panier = panier.map(element => {
       if (element.name == cibleName && element.color == cibleColor) {
         console.log(nouveauPanier);
@@ -79,7 +79,7 @@ for (el of buttonDelete) {
       } else {
         return panier;
       }
-      
+
     })
 
   }))
@@ -90,3 +90,50 @@ if (panier && panier.length == 0) {
   localStorage.clear();
   window.location.reload();
 }
+
+let firstName = document.querySelector('#firstName');
+let lastName = document.querySelector('#lastName');
+let address = document.querySelector('#address');
+let city = document.querySelector('#city');
+let email = document.querySelector('#email');
+
+let contact = {
+  firstName: toString(firstName.value),
+  lastName: toString(lastName.value),
+  address: toString(address.value),
+  city: toString(city.value),
+  email: toString(email.value),
+}
+
+let products = []
+
+for(article of panier) {
+  products.push(article.id)
+}
+
+const obj = {
+  contact,
+  products,
+}
+function requestApiPost() {
+  const requestPost = fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    mode: 'cors',
+    body: JSON.stringify(obj),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  requestPost.then((response => response.json()
+    .then((data => console.log(data)))))
+  .catch((error => console.log(error)))
+}
+
+
+document.querySelector('#order').addEventListener('click', (e => {
+  e.preventDefault()
+  console.log(JSON.stringify(obj))
+  requestApiPost();
+}))
+
+
