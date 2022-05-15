@@ -69,9 +69,9 @@ for (el of buttonDelete) {
 
     panier = panier.map(element => {
       if (element.name == cibleName && element.color == cibleColor) {
-        console.log(nouveauPanier);
+        // console.log(nouveauPanier);
         indice = panier.indexOf(element)
-        console.log('voici lindice' + indice);
+        // console.log('voici lindice' + indice);
         nouveauPanier.splice(indice, 1);
         localStorage.setItem("product", JSON.stringify(nouveauPanier));
         window.location.reload();
@@ -86,54 +86,152 @@ for (el of buttonDelete) {
 }
 
 if (panier && panier.length == 0) {
-  console.log("supprimer");
+  // console.log("supprimer");
   localStorage.clear();
   window.location.reload();
 }
 
-let firstName = document.querySelector('#firstName');
-let lastName = document.querySelector('#lastName');
-let address = document.querySelector('#address');
-let city = document.querySelector('#city');
-let email = document.querySelector('#email');
 
-let contact = {
-  firstName: toString(firstName.value),
-  lastName: toString(lastName.value),
-  address: toString(address.value),
-  city: toString(city.value),
-  email: toString(email.value),
-}
 
-let products = []
-
-for(article of panier) {
-  products.push(article.id)
-}
-
-const obj = {
-  contact,
-  products,
-}
-function requestApiPost() {
+function requestApiPost(command) {
   const requestPost = fetch('http://localhost:3000/api/products/order', {
     method: 'POST',
-    mode: 'cors',
-    body: JSON.stringify(obj),
+    body: JSON.stringify(command),
     headers: {
       "Content-Type": "application/json",
     },
   });
   requestPost.then((response => response.json()
     .then((data => console.log(data)))))
-  .catch((error => console.log(error)))
+    .catch((error => console.log(error)))
 }
 
+let form = document.querySelector('.cart__order__form');
 
-document.querySelector('#order').addEventListener('click', (e => {
-  e.preventDefault()
-  console.log(JSON.stringify(obj))
-  requestApiPost();
-}))
+  form.order.addEventListener('click', (e => {
+    e.preventDefault()
 
 
+    let contact = {
+      firstName: form.firstName.value,
+      lastName: form.lastName.value,
+      address: form.address.value,
+      city: form.city.value,
+      email: form.email.value,
+    }
+
+    let products = []
+
+    for (article of panier) {
+      products.push(article.id)
+    }
+
+    let obj = {
+      contact,
+      products,
+    }
+    // console.log(obj)
+    console.log(JSON.stringify(obj))
+    requestApiPost(obj);
+  }))
+
+
+// let firstNameBool = false;
+// let lastNameBool = false;
+// let addressBool = false;
+// let cityBool = false;
+// let emailBool = false;
+// Création de la reg exp pour la validation de l'e-mail
+function validFirstName() {
+  let firstNameRegExp = new RegExp('^[a-zA-Z\-\']+$');
+  let firstNameCheck = document.querySelector('#firstNameErrorMsg');
+  if (firstNameRegExp.test(firstName.value) && firstName.value.length > 1) {
+    firstNameCheck.innerHTML = '';
+    // firstNameBool = true;
+  } else {
+    firstNameCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -, '}"
+    // firstNameBool = false;
+  }
+}
+
+function validLastName() {
+  let lastNameRegExp = new RegExp('^[a-zA-Z\-\']+$');
+  let lastNameCheck = document.querySelector('#lastNameErrorMsg');
+  if (lastNameRegExp.test(lastName.value) && lastName.value.length > 1) {
+    lastNameCheck.innerHTML = '';
+    // lastNameBool = true;
+  } else {
+    lastNameCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -, '}"
+    // lastNameBool = false;
+  }
+}
+
+function validCity() {
+  let cityRegExp = new RegExp('^[a-zA-Z\-]+$');
+  let cityCheck = document.querySelector('#cityErrorMsg');
+  if (cityRegExp.test(city.value) && city.value.length > 1) {
+    cityCheck.innerHTML = '';
+    // cityBool = true;
+  } else {
+    cityCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -}"
+    // cityBool = false;
+  }
+
+}
+
+function validAddress() {
+  let addressRegExp = new RegExp('^[^@&"()!_$*€£`+=\/;?#]+$');
+  let addressCheck = document.querySelector('#addressErrorMsg');
+  if (addressRegExp.test(address.value) && address.value.length > 1) {
+    addressCheck.innerHTML = '';
+    // addressBool = true
+  } else {
+    addressCheck.innerHTML = 'Les caractères spéciaux sont interdits.'
+    // addressBool = false
+  }
+}
+
+function validEmail() {
+  let emailRegExp = new RegExp(
+    '^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$', 'g'
+  );
+  let emailCheck = document.querySelector('#emailErrorMsg');
+  if (emailRegExp.test(email.value) && email.value.length > 1) {
+    emailCheck.innerHTML = '';
+    // emailBool = true;
+  } else {
+    emailCheck.innerHTML = 'Email invalide';
+    // emailBool = false;
+  }
+
+}
+
+form.email.addEventListener('change', function () {
+  validEmail(this);
+})
+
+form.firstName.addEventListener('change', function () {
+  validFirstName(this);
+})
+
+form.lastName.addEventListener('change', function () {
+  validLastName(this);
+})
+
+form.city.addEventListener('change', function () {
+  validCity(this);
+})
+
+form.address.addEventListener('change', function () {
+  validAddress(this);
+})
+
+// if (!firstNameBool
+//   || !lastNameBool
+//   || !addressBool
+//   || !cityBool
+//   || !emailBool) {
+//     form.order.setAttribute('disabled', true);
+//   } else {
+//     form.order.removeAttribute('disabled');
+//   }
