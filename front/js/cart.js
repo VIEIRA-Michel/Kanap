@@ -99,7 +99,10 @@ function requestApiPost(command) {
     },
   });
   requestPost.then((response => response.json()
-  .then((data => console.log(data)))))
+  .then((data => {
+    window.location = `confirmation.html?${data.orderId}`;
+    localStorage.clear();
+  }))))
   .catch((error => console.log(error)))
 }
 
@@ -135,6 +138,8 @@ let emailBool = false;
     }
     console.log(JSON.stringify(obj))
     requestApiPost(obj);
+  
+    
   }))
   
   
