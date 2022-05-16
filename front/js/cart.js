@@ -31,6 +31,16 @@ if (panier !== null) {
     prixFinal += article.price * article.quantity
   }
 
+} else {
+
+  let b = document.body;
+  let container = document.getElementById('cartAndFormContainer');
+  let panierVide = document.createElement('h2');
+  panierVide.textContent = `Il n'y a aucun article`;
+  panierVide.style.textAlign = 'center';
+
+  // On explique ici qu'on veut insérer notre élément h2 après le h1
+  container.firstElementChild.parentNode.insertBefore(panierVide, container.firstElementChild.nextSibling)
 }
 
 document.querySelector('#totalPrice').innerHTML = prixFinal;
@@ -79,7 +89,7 @@ for (el of buttonDelete) {
       }
 
     })
-    
+
   }))
 }
 
@@ -99,11 +109,11 @@ function requestApiPost(command) {
     },
   });
   requestPost.then((response => response.json()
-  .then((data => {
-    window.location = `confirmation.html?${data.orderId}`;
-    localStorage.clear();
-  }))))
-  .catch((error => console.log(error)))
+    .then((data => {
+      window.location = `confirmation.html?${data.orderId}`;
+      localStorage.clear();
+    }))))
+    .catch((error => console.log(error)))
 }
 
 let form = document.querySelector('.cart__order__form');
@@ -114,35 +124,35 @@ let addressBool = false;
 let cityBool = false;
 let emailBool = false;
 
-  checkForEnableButton()
-  form.order.addEventListener('click', (e => {
-    e.preventDefault()
-    
-    let contact = {
-      firstName: form.firstName.value,
-      lastName: form.lastName.value,
-      address: form.address.value,
-      city: form.city.value,
-      email: form.email.value,
-    }
+checkForEnableButton()
+form.order.addEventListener('click', (e => {
+  e.preventDefault()
 
-    let products = []
+  let contact = {
+    firstName: form.firstName.value,
+    lastName: form.lastName.value,
+    address: form.address.value,
+    city: form.city.value,
+    email: form.email.value,
+  }
 
-    for (article of panier) {
-      products.push(article.id)
-    }
+  let products = []
 
-    let obj = {
-      contact,
-      products,
-    }
-    console.log(JSON.stringify(obj))
-    requestApiPost(obj);
-  
-    
-  }))
-  
-  
+  for (article of panier) {
+    products.push(article.id)
+  }
+
+  let obj = {
+    contact,
+    products,
+  }
+  console.log(JSON.stringify(obj))
+  requestApiPost(obj);
+
+
+}))
+
+
 // Création de la reg exp pour la validation de l'e-mail
 function validFirstName() {
   let firstNameRegExp = new RegExp('^[a-zA-Z\-\']+$');
@@ -239,8 +249,8 @@ function checkForEnableButton() {
     || !addressBool
     || !cityBool
     || !emailBool) {
-      form.order.setAttribute('disabled', true);
-    } else {
-      form.order.removeAttribute('disabled');
-    }
+    form.order.setAttribute('disabled', true);
+  } else {
+    form.order.removeAttribute('disabled');
+  }
 }
