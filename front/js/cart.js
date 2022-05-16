@@ -69,9 +69,7 @@ for (el of buttonDelete) {
 
     panier = panier.map(element => {
       if (element.name == cibleName && element.color == cibleColor) {
-        // console.log(nouveauPanier);
         indice = panier.indexOf(element)
-        // console.log('voici lindice' + indice);
         nouveauPanier.splice(indice, 1);
         localStorage.setItem("product", JSON.stringify(nouveauPanier));
         window.location.reload();
@@ -81,12 +79,11 @@ for (el of buttonDelete) {
       }
 
     })
-
+    
   }))
 }
 
 if (panier && panier.length == 0) {
-  // console.log("supprimer");
   localStorage.clear();
   window.location.reload();
 }
@@ -102,16 +99,22 @@ function requestApiPost(command) {
     },
   });
   requestPost.then((response => response.json()
-    .then((data => console.log(data)))))
-    .catch((error => console.log(error)))
+  .then((data => console.log(data)))))
+  .catch((error => console.log(error)))
 }
 
 let form = document.querySelector('.cart__order__form');
 
+let firstNameBool = false;
+let lastNameBool = false;
+let addressBool = false;
+let cityBool = false;
+let emailBool = false;
+
+  checkForEnableButton()
   form.order.addEventListener('click', (e => {
     e.preventDefault()
-
-
+    
     let contact = {
       firstName: form.firstName.value,
       lastName: form.lastName.value,
@@ -130,27 +133,21 @@ let form = document.querySelector('.cart__order__form');
       contact,
       products,
     }
-    // console.log(obj)
     console.log(JSON.stringify(obj))
     requestApiPost(obj);
   }))
-
-
-// let firstNameBool = false;
-// let lastNameBool = false;
-// let addressBool = false;
-// let cityBool = false;
-// let emailBool = false;
+  
+  
 // Création de la reg exp pour la validation de l'e-mail
 function validFirstName() {
   let firstNameRegExp = new RegExp('^[a-zA-Z\-\']+$');
   let firstNameCheck = document.querySelector('#firstNameErrorMsg');
   if (firstNameRegExp.test(firstName.value) && firstName.value.length > 1) {
     firstNameCheck.innerHTML = '';
-    // firstNameBool = true;
+    firstNameBool = true;
   } else {
     firstNameCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -, '}"
-    // firstNameBool = false;
+    firstNameBool = false;
   }
 }
 
@@ -159,10 +156,10 @@ function validLastName() {
   let lastNameCheck = document.querySelector('#lastNameErrorMsg');
   if (lastNameRegExp.test(lastName.value) && lastName.value.length > 1) {
     lastNameCheck.innerHTML = '';
-    // lastNameBool = true;
+    lastNameBool = true;
   } else {
     lastNameCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -, '}"
-    // lastNameBool = false;
+    lastNameBool = false;
   }
 }
 
@@ -171,10 +168,10 @@ function validCity() {
   let cityCheck = document.querySelector('#cityErrorMsg');
   if (cityRegExp.test(city.value) && city.value.length > 1) {
     cityCheck.innerHTML = '';
-    // cityBool = true;
+    cityBool = true;
   } else {
     cityCheck.innerHTML = "Caractères autorisé : {a-z} {espace, -}"
-    // cityBool = false;
+    cityBool = false;
   }
 
 }
@@ -184,10 +181,10 @@ function validAddress() {
   let addressCheck = document.querySelector('#addressErrorMsg');
   if (addressRegExp.test(address.value) && address.value.length > 1) {
     addressCheck.innerHTML = '';
-    // addressBool = true
+    addressBool = true
   } else {
     addressCheck.innerHTML = 'Les caractères spéciaux sont interdits.'
-    // addressBool = false
+    addressBool = false
   }
 }
 
@@ -198,40 +195,47 @@ function validEmail() {
   let emailCheck = document.querySelector('#emailErrorMsg');
   if (emailRegExp.test(email.value) && email.value.length > 1) {
     emailCheck.innerHTML = '';
-    // emailBool = true;
+    emailBool = true;
   } else {
     emailCheck.innerHTML = 'Email invalide';
-    // emailBool = false;
+    emailBool = false;
   }
 
 }
 
 form.email.addEventListener('change', function () {
   validEmail(this);
+  checkForEnableButton();
 })
 
 form.firstName.addEventListener('change', function () {
   validFirstName(this);
+  checkForEnableButton();
 })
 
 form.lastName.addEventListener('change', function () {
   validLastName(this);
+  checkForEnableButton();
 })
 
 form.city.addEventListener('change', function () {
   validCity(this);
+  checkForEnableButton();
 })
 
 form.address.addEventListener('change', function () {
   validAddress(this);
+  checkForEnableButton();
 })
 
-// if (!firstNameBool
-//   || !lastNameBool
-//   || !addressBool
-//   || !cityBool
-//   || !emailBool) {
-//     form.order.setAttribute('disabled', true);
-//   } else {
-//     form.order.removeAttribute('disabled');
-//   }
+function checkForEnableButton() {
+  if (!firstNameBool
+    || !lastNameBool
+    || !addressBool
+    || !cityBool
+    || !emailBool) {
+      form.order.setAttribute('disabled', true);
+    } else {
+      form.order.removeAttribute('disabled');
+    }
+}
