@@ -2,11 +2,10 @@
 let params = new URL(document.location).searchParams;
 // On récupère l'id présent dans l'url et on le stock dans une variable
 let id = params.get("id");
-// On créer un objet vide prêt a recevoir les informations concernant l'article que l'on consulte
+// On crée un objet vide prêt à recevoir les informations concernant l'article que l'on consulte
 let article = {};
-// article._id = id;
 
-// On execute notre requête en précisant à la fin l'id de larticle pour lequel on souhaite obtenir les informations
+// On exécute notre requête en précisant à la fin l'id de l'article pour lequel on souhaite obtenir les informations
 fetch(`http://localhost:3000/api/products/${id}`)
     .then((response) =>
         response.json().then((data) => {
@@ -40,18 +39,18 @@ function displayProduct(data) {
 }
 
 // On met l'écouteur sur le champ concernant la couleur
-// pour le rajouter à notre objet une fois que l'utilisateur aura fait sont choix
+// pour le rajouter à notre objet une fois que l'utilisateur aura fait son choix
 let color = document.querySelector('#colors').addEventListener('change', function (e) {
     article.color = e.currentTarget.value;
 })
 // On met également l'écouteur sur la quantité
-// pour le rajouter à notre objet une fois que l'utilisateur saura combien il en veux
+// pour le rajouter à notre objet une fois que l'utilisateur saura combien il en veut
 let quantity = document.querySelector('#quantity').addEventListener('change', function (e) {
     article.quantity = e.currentTarget.value;
 })
 
 // Une fois que l'utilisateur clique sur le bouton ajouter au panier, on envoie notre objet "Article"
-// qui a récolter toutes les données jusqu'à présent dans la fonction qui va faire quelque verification
+// qui a récolté toutes les données jusqu'à présent dans la fonction qui va faire quelque vérification
 // avant de l'ajouter au panier
 let addToCart = document.querySelector('#addToCart').addEventListener("click", function () {
     if (article.color && article.quantity) {
@@ -79,18 +78,17 @@ let modify = false;
 // pour l'ajouter comme nouvelle article
 let newArticle = false;
 
-// Cette fonction va nous permettre de faire plusieurs verification afin d'éviter toutes erreurs
+// Cette fonction va nous permettre de faire plusieurs vérifications afin d'éviter toutes erreurs
 function checkProduct(produit) {
-    // Ici nous récuperons le localStorage que l'on va stocker dans une variable
+    // Ici nous récupérons le localStorage que l'on va stocker dans une variable
     let produitLocalStorage = JSON.parse(localStorage.getItem("product"));
-    // Grâce à la boucle map nous allons pouvoir éplucher chacun des articles présent dans le localstorage
+    // Grâce à la boucle map nous allons pouvoir éplucher chacun des articles présents dans le localstorage
     produitLocalStorage = produitLocalStorage.map(el => {
-        // Et verifier si l'un deux correspond avec l'article que nous souhaitons ajouter
+        // Et vérifier si l'un deux corresponds à l'article que nous souhaitons ajouter
         if (el.id == produit.id && el.color == produit.color) {
-            // Si c'est le cas nous stockons l'addition de la quantité de l'article déjà présent dans le panier
-            // et celle que nous nous apprétons à ajouter dans une nouvelle variable
+            // Si c'est le cas nous stockons l'addition de la quantité d'article et celle déjà présente dans le panier
             let newNumber = parseInt(el.quantity) + parseInt(produit.quantity);
-            // que l'on attribuera ensuite comme nouvelle quantité à l'élement déjà présent dans le panier
+            // que l'on attribuera ensuite comme nouvelle quantité à l'élément déjà présent dans le panier
             el.quantity = String(newNumber);
             // Et nous passons ensuite la variable modify à "true" 
             modify = true;
@@ -110,17 +108,17 @@ function checkProduct(produit) {
         addedOnLocalStorage(produitLocalStorage);
         modify = false;
     } else if (newArticle == true) {
-        // ici nous allons push notre nouvelle article dans notre variable ou l'on à récuperer
-        // tous les articles déjà présent dans le localStorage
+        // ici nous allons push notre nouvel article dans notre variable où l'on a récupéré
+        // tous les articles déjà présents dans le localStorage
         produitLocalStorage.push(article)
-        // avant de la ré-expédier de nouveau dans le localStorage
+        // avant de ré-expédier de nouveau dans le localStorage
         addedOnLocalStorage(produitLocalStorage);
         newArticle = false;
     }
 
 };
 
-// Animation qui va nous permettre de changer la couleur du bouton une fois qu'un article aura été ajouter a notre panier
+// Animation qui va nous permettre de changer la couleur du bouton une fois qu'un article aura été ajouté a notre panier
 function animationButton() {
     document.querySelector("#addToCart").textContent = "Ajouté à votre panier!";
     document.querySelector("#addToCart").style.background = "rgb(0, 205, 0)";
@@ -130,7 +128,7 @@ function animationButton() {
     }, 500)
 }
 
-// Fonction qui va ajouter l'élément passer en parametre dans le localStorage
+// Fonction qui va ajouter l'élément passer en paramètre dans le localStorage
 function addedOnLocalStorage(product) {
     localStorage.setItem("product", JSON.stringify(product))
 }
