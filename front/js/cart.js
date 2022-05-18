@@ -3,6 +3,13 @@ let panier = JSON.parse(localStorage.getItem("product"));
 
 // Avec cette vérification on cherche à s'assurer que le panier n'est pas vide
 if (panier !== null) {
+  panier.sort(function compare(a, b) {
+    if (a.name < b.name)
+       return -1;
+    if (a.name > b.name )
+       return 1;
+    return 0;
+  });
   // S'il ne l'est pas nous allons boucler sur chaque article présent dedans
   for (article of panier) {
     // et incrémenter la div #cart__items de contenu html pré remplis avec les données de chacun des produits

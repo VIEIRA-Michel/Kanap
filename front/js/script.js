@@ -10,7 +10,7 @@ fetch(url)
                 // nous allons incrémenter notre variable affichage, de contenu HTML pré remplis
                 // avec les données de chaque canapé récupérer via notre requête
                 affichage +=
-                    `<a href="../html/product.html?id=${article._id}">
+                    `<a href="../product.html?id=${article._id}">
                 <article>
                 <img src="${article.imageUrl}" alt="${article.altTxt}">
                 <h3 class="productName">${article.name}</h3>
