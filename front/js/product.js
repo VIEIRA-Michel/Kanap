@@ -5,19 +5,25 @@ let id = params.get("id");
 // On crée un objet vide prêt à recevoir les informations concernant l'article que l'on consulte
 let article = {};
 
-// On exécute notre requête en précisant à la fin l'id de l'article pour lequel on souhaite obtenir les informations
-fetch(`http://localhost:3000/api/products/${id}`)
-    .then((response) =>
-        response.json().then((data) => {
-            displayProduct(data);
-        }))
-    .catch((error) => {
-        console.log(error);
-    });
+// Notre fonction exécute une requête fetch afin de récupérer les données grâce à l'id du canapé passer en paramètre
+function getProduct(id) {
+    fetch(`http://localhost:3000/api/products/${id}`)
+        .then((response) =>
+            response.json().then((data) => {
+                // Dans le cas ou notre requête réussi on exécute notre fonction displayProduct 
+                // en passant en paramètre les données du canapé récupérer pour afficher l'article avec toutes ses caractéristiques
+                displayProduct(data);
+            }))
+        .catch((error) => {
+            console.log(error);
+        });
+}
+getProduct(id);
 
 // Fonction qui va nous permettre d'afficher les informations du produit grâce aux données récupérer,
 // et de stocker les données concernant l'article dans un objet
 function displayProduct(data) {
+    // on destructure les données reçues et on enregistre chacune d'entre elles dans une variable
     const { imageUrl, name, price, description, colors, altTxt } = data;
     document.querySelector('.item__img').innerHTML =
         `<img src="${imageUrl}" alt="${altTxt}"></img>`
@@ -28,6 +34,7 @@ function displayProduct(data) {
         document.querySelector('#colors').innerHTML +=
             `<option value="${color}">${color}</option>`
     }
+    // On modifie notre objet en lui ajoutant des informations du canapé en question
     article = {
         id: id,
         image: imageUrl,
@@ -38,7 +45,7 @@ function displayProduct(data) {
     }
 }
 
-// On met l'écouteur sur le champ concernant la couleur
+// On place l'écouteur sur le champ concernant la couleur
 // pour le rajouter à notre objet une fois que l'utilisateur aura fait son choix
 let color = document.querySelector('#colors').addEventListener('change', function (e) {
     article.color = e.currentTarget.value;

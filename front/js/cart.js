@@ -2,63 +2,72 @@
 let panier = JSON.parse(localStorage.getItem("product"));
 
 // Avec cette vérification on cherche à s'assurer que le panier n'est pas vide
-if (panier !== null) {
-  // On lui passe la fonction sort afin de trier les articles dans notre panier
-  // par ordre alphabétique afin de regrouper entre eux les modèles de canapé
-  panier.sort(function compare(a, b) {
-    if (a.name < b.name)
-       return -1;
-    if (a.name > b.name )
-       return 1;
-    return 0;
-  });
+function verifyBasket(panier) {
+  if (panier !== null) {
+    // On lui passe la fonction sort afin de trier les articles dans notre panier
+    // par ordre alphabétique afin de regrouper entre eux les modèles de canapé
+    panier.sort(function compare(a, b) {
+      if (a.name < b.name)
+        return -1;
+      if (a.name > b.name)
+        return 1;
+      return 0;
+    });
+    // une fois le panier trié on passe le résultat à notre fonction displayProductsOnBasket afin d'afficher le rendu
+    displayProductsOnBasket(panier);
+    //  dans le cas contraire
+  } else {
+    // Nous allons ici sélectionner la div parente #cartAndFormContainer et la stocké dans une variable
+    let container = document.getElementById('cartAndFormContainer');
+    // Créer un h2 et le stocké dans une variable que l'on appelera panierVide
+    let panierVide = document.createElement('h2');
+    // Changer son contenu par le suivant
+    panierVide.textContent = `Il n'y a aucun article`;
+    // lui ajouter une propriété css afin qu'il soit aligné au centre
+    panierVide.style.textAlign = 'center';
+    // On explique ici qu'on veut insérer notre élément h2 après le premier enfant qui est le h1 de notre div parente #cartAndFormContainer 
+    container.firstElementChild.parentNode.insertBefore(panierVide, container.firstElementChild.nextSibling)
+    // On va sélectionner la balise contenant le prix et lui attribuer la valeur '0' étant donné que le panier est vide
+    document.querySelector('#totalPrice').innerHTML = '0'
+  }
+}
+
+function displayProductsOnBasket(panier) {
   // S'il ne l'est pas nous allons boucler sur chaque article présent dedans
   for (article of panier) {
     // et incrémenter la div #cart__items de contenu html pré remplis avec les données de chacun des produits
     document.querySelector('#cart__items').innerHTML += `
-      <article class="cart__item" data-id="${article.id}" data-color="${article.color}">
-                  <div class="cart__item__img">
-                    <img src="${article.image}" alt="${article.alt}">
-                  </div>
-                  <div class="cart__item__content">
-                    <div class="cart__item__content__description">
-                      <h2>${article.name}</h2>
-                      <p>${article.color}</p>
-                      <p>${article.price} €</p>
+        <article class="cart__item" data-id="${article.id}" data-color="${article.color}">
+                    <div class="cart__item__img">
+                      <img src="${article.image}" alt="${article.alt}">
                     </div>
-                    <div class="cart__item__content__settings">
-                      <div class="cart__item__content__settings__quantity">
-                        <p>Qté : </p>
-                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
+                    <div class="cart__item__content">
+                      <div class="cart__item__content__description">
+                        <h2>${article.name}</h2>
+                        <p>${article.color}</p>
+                        <p>${article.price} €</p>
                       </div>
-                      <div class="cart__item__content__settings__delete">
-                        <p class="deleteItem" data-id="${article.id}" data-color="${article.color}">Supprimer</p>
+                      <div class="cart__item__content__settings">
+                        <div class="cart__item__content__settings__quantity">
+                          <p>Qté : </p>
+                          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
+                        </div>
+                        <div class="cart__item__content__settings__delete">
+                          <p class="deleteItem" data-id="${article.id}" data-color="${article.color}">Supprimer</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </article>`
+                  </article>`
   }
-  // On lance la fonction qui va permettre de calculer le prix ainsi que celle qui va permettre de changer la quantité afin de modifier
-  // dynamiquement l'affichage
-  calculatePrice();
-  changeQuantity();
-  deleteArticle();
-  //  dans le cas contraire
-} else {
-
-  // Nous allons ici sélectionner la div parente #cartAndFormContainer et la stocké dans une variable
-  let container = document.getElementById('cartAndFormContainer');
-  // Créer un h2 et le stocké dans une variable que l'on appelera panierVide
-  let panierVide = document.createElement('h2');
-  // Changer son contenu par le suivant
-  panierVide.textContent = `Il n'y a aucun article`;
-  // lui ajouter une propriété css afin qu'il soit aligné au centre
-  panierVide.style.textAlign = 'center';
-  // On explique ici qu'on veut insérer notre élément h2 après le premier enfant qui est le h1 de notre div parente #cartAndFormContainer 
-  container.firstElementChild.parentNode.insertBefore(panierVide, container.firstElementChild.nextSibling)
-  // On va sélectionner la balise contenant le prix et lui attribuer la valeur '0' étant donné que le panier est vide
-  document.querySelector('#totalPrice').innerHTML = '0'
 }
+// On lance les fonctions qui vont nous permettre de vérifier si le panier est vide
+//  dans le cas contraire de le trier et celles afin de calculer le prix total de changer la quantité d'article 
+// et de supprimer des articles afin de pouvoir modifier dynamiquement l'affichage
+verifyBasket(panier);
+calculatePrice();
+changeQuantity();
+deleteArticle();
+
 
 // Cette fonction va nous permettre de calculer le prix total de tous les articles présents dans le panier
 function calculatePrice() {
@@ -151,7 +160,7 @@ function deleteArticle() {
       })
     }))
   }
-// dans le cas ou notre panier est existant, mais que sa longueur est de 0
+  // dans le cas ou notre panier est existant, mais que sa longueur est de 0
   if (panier && panier.length == 0) {
     // On vide le localStorage
     localStorage.clear();
