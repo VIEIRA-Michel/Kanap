@@ -3,6 +3,8 @@ let panier = JSON.parse(localStorage.getItem("product"));
 
 // Avec cette vérification on cherche à s'assurer que le panier n'est pas vide
 if (panier !== null) {
+  // On lui passe la fonction sort afin de trier les articles dans notre panier
+  // par ordre alphabétique afin de regrouper entre eux les modèles de canapé
   panier.sort(function compare(a, b) {
     if (a.name < b.name)
        return -1;
