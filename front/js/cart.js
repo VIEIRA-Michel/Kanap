@@ -17,18 +17,7 @@ function verifyBasket(panier) {
     displayProductsOnBasket(panier);
     //  dans le cas contraire
   } else {
-    // Nous allons ici sélectionner la div parente #cartAndFormContainer et la stocké dans une variable
-    let container = document.getElementById('cartAndFormContainer');
-    // Créer un h2 et le stocké dans une variable que l'on appelera panierVide
-    let panierVide = document.createElement('h2');
-    // Changer son contenu par le suivant
-    panierVide.textContent = `Il n'y a aucun article`;
-    // lui ajouter une propriété css afin qu'il soit aligné au centre
-    panierVide.style.textAlign = 'center';
-    // On explique ici qu'on veut insérer notre élément h2 après le premier enfant qui est le h1 de notre div parente #cartAndFormContainer 
-    container.firstElementChild.parentNode.insertBefore(panierVide, container.firstElementChild.nextSibling)
-    // On va sélectionner la balise contenant le prix et lui attribuer la valeur '0' étant donné que le panier est vide
-    document.querySelector('#totalPrice').innerHTML = '0'
+    emptyBasket();
   }
 }
 
@@ -60,6 +49,21 @@ function displayProductsOnBasket(panier) {
                   </article>`
   }
 }
+
+function emptyBasket() {
+  // Nous allons ici sélectionner la div parente #cartAndFormContainer et la stocké dans une variable
+  let container = document.getElementById('cartAndFormContainer');
+  // Créer un h2 et le stocké dans une variable que l'on appelera panierVide
+  let panierVide = document.createElement('h2');
+  // Changer son contenu par le suivant
+  panierVide.textContent = `Il n'y a aucun article`;
+  // lui ajouter une propriété css afin qu'il soit aligné au centre
+  panierVide.style.textAlign = 'center';
+  // On explique ici qu'on veut insérer notre élément h2 après le premier enfant qui est le h1 de notre div parente #cartAndFormContainer 
+  container.firstElementChild.parentNode.insertBefore(panierVide, container.firstElementChild.nextSibling)
+  // On va sélectionner la balise contenant le prix et lui attribuer la valeur '0' étant donné que le panier est vide
+  document.querySelector('#totalPrice').innerHTML = '0'
+}
 // On lance les fonctions qui vont nous permettre de vérifier si le panier est vide
 //  dans le cas contraire de le trier et celles afin de calculer le prix total de changer la quantité d'article 
 // et de supprimer des articles afin de pouvoir modifier dynamiquement l'affichage
@@ -74,58 +78,53 @@ function calculatePrice() {
   // On définis le prix final de base à 0
   prixFinal = 0;
   // On récupère le contenu de notre panier et on le stock dans une variable du même nom
-  let panier = JSON.parse(localStorage.getItem("product"));
+  let newPanier = JSON.parse(localStorage.getItem("product"));
   // On va parcourir chacun des produits présents dans le panier
-  for (product of panier) {
-    // On crée une variable contenant un tableau vide qui contiendra la somme de chacun des canapés
-    let priceTotal = []
-    // On va ajouter a notre tableau le prix total de chacun des articles en multipliant leur prix par la quantité présente dans le panier
-    priceTotal.push(product.price * product.quantity);
-    // Et on va boucler afin de calculer le cumul des sommes de chacun des articles présents dans le panier
-    for (let i = 0; i < priceTotal.length; i++) {
-      // Et le stocker dans une variable qui va être incrémenté pour chaque article dans le panier
-      prixFinal += priceTotal[i]
+  if (newPanier !== null) {
+    for (product of newPanier) {
+      // On crée une variable contenant un tableau vide qui contiendra la somme de chacun des canapés
+      let priceTotal = []
+      // On va ajouter a notre tableau le prix total de chacun des articles en multipliant leur prix par la quantité présente dans le panier
+      priceTotal.push(product.price * product.quantity);
+      // Et on va boucler afin de calculer le cumul des sommes de chacun des articles présents dans le panier
+      for (let i = 0; i < priceTotal.length; i++) {
+        // Et le stocker dans une variable qui va être incrémenté pour chaque article dans le panier
+        prixFinal += priceTotal[i]
+      }
     }
   }
   // Pour par la suite cibler la balise contenant le prix total et lui assigner le prix
   document.querySelector('#totalPrice').innerHTML = prixFinal;
 }
 
+// On crée une variable contenant un booléen qu'on définis sur false
+let modifQuantity = false;
+
 function changeQuantity() {
-  // Ici on sélectionne tous les champs qui vont permettre de changer la quantité
-  let changeQuantity = document.querySelectorAll('.itemQuantity');
-  // On crée une variable contenant un booléen qu'on définis sur false
-  let modifQuantity = false;
-  for (el of changeQuantity) {
-    el.addEventListener('change', (e => {
-      // Ici nous allons parcourir chacun des éléments présents dans le panier
-      panier = panier.map(element => {
-        console.log(el.dataset)
-        // Si l'élément pour lequel nous avons changé la quantité, a le même id et la même couleur qu'un élément déjà présent dans le panier
-        if (element.id == el.dataset.id && element.color == el.dataset.color) {
-          // Nous allons enregistrer dans une variable la nouvelle quantité que l'on a sélectionné
-          let newQuantity = parseInt(e.target.value);
-          // Et l'attribué à l'élément déjà présent dans notre panier
-          element.quantity = String(newQuantity);
-          // Passer la valeur de notre booléen à true
-          modifQuantity = true;
-          // enregistrer les modifications
-          return element;
-        } else {
-          return element;
+  // On sélectionne la carte dans son intégralité afin de récupérer les données des datasets
+  const cards = document.querySelectorAll(".cart__item");
+  // on va boucler sur 'cards' afin d'avoir accès à ses enfants
+  cards.forEach((card) => {
+    // On écoute ce qu'il se passe dans itemQuantity de l'article concerné
+    card.addEventListener("change", (event) => {
+      // vérification d'information de la valeur du clic et son positionnement dans les articles
+      let panier = JSON.parse(localStorage.getItem("product"));
+      // boucle pour modifier la quantité du produit du panier grace à la nouvelle valeur
+      for (article of panier)
+        if (
+          article.id == card.dataset.id &&
+          card.dataset.color == article.color
+        ) {
+          // Nous allons appliqué directement dans l'article présent dans le localStorage
+          // la nouvelle quantité que l'on a sélectionné
+          article.quantity = event.target.value;
+          // On va expédier dans le localStorage notre panier fraîchement modifié
+          localStorage.setItem("product", JSON.stringify(panier));
+          // puis recalculer le prix, car les quantités ont changé
+          calculatePrice();
         }
-      })
-      // si notre booléen est à true
-      if (modifQuantity = true) {
-        // On va expédier dans le localStorage notre panier fraîchement modifié
-        localStorage.setItem("product", JSON.stringify(panier))
-        // recalculer le prix, car les quantités ont changé
-        calculatePrice();
-        // et repasser notre booléen à false
-        modifQuantity = false;
-      }
-    }))
-  }
+    });
+  });
 }
 
 
@@ -242,7 +241,6 @@ let emailBool = false;
 
 // Ici on sélectionne le formulaire et on l'enregistre dans une variable
 let form = document.querySelector('.cart__order__form');
-
 // On lance notre fonction afin quelle désactive le bouton commander pour éviter toute erreur
 // Étant donné que pour l'instant tous les champs sont vide
 checkForEnableButton()
