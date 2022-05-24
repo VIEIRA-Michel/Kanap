@@ -5,43 +5,42 @@ let produits = [];
 produits = panier;
 
 function getPrice(panier) {
-  // On définis une variable sur 0 qui nous permettra de déclencher par la suite 
-  // notre fonction qui nous permettra d'afficher les éléments une fois tous les prix récupérer
-  let i = 0;
-  // Pour chaque article présent dans notre panier
-  for (article of panier) {
-    // on va exécuter une requête fetch afin de récupérer son prix
-    fetch(`http://localhost:3000/api/products/${article.id}`)
+    // on va exécuter une requête fetch afin de récupérer tout le catalogue de l'api
+    fetch(`http://localhost:3000/api/products/`)
       .then((response) =>
         response.json().then((data) => {
-          // Pour chaque 
-          for (product of produits) {
-            // On va assigner à chacun des produits leurs prix que l'on a récupéré depuis l'api
-            product.price = data.price;
-          }
-          // on incrémente la valeur de notre variable 'i'
-          i++
-          // Une fois que la valeur de notre variable 'i' est égal à la longueur de notre panier 
-          // on déclenche notre fonction qui va nous permettre de le trier
-          if (i == panier.length) {
-            sortBasket(produits)
-          }
-        }))
+          // on va boucler sur notre panier pour parcourir chacun des éléments
+          panier = panier.map(element => 
+            {
+              // on va stocker l'index du produit ayant l'id correspondant dans le catalogue
+              let index = data.findIndex(el => el._id == element.id);
+              // si l'index est supérieur à -1
+              if(index > -1) {
+                // dans ce cas nous ajouterons la propriété price à notre élément et on lui attribuera la valeur du catalogue
+                element.price = data[index].price;
+              }
+              return element;
+            }
+          )
+          // on lance notre fonction de tri
+          sortBasket(produits)
+        }
+        
+        ))
       .catch((error) => {
         console.log(error);
       });
-  }
 }
-// Si notre panier comporte bien un produit on va déclencher la fonction qui va nous permettre de récupérer son prix
-if (panier !== null) {
-  getPrice(panier);
-  // dans le cas contraire on va déclencher la fonction qui va nous afficher un message nous indiquant que notre panier est vide
-} else {
+// Si notre panier n'existe pas ou qu'il est existant mais qu'il ne comporte rien on va exécuter notre fonction qui va nous afficher un message nous indiquant que notre panier est vide
+if (panier == undefined || panier.length < 1) {
   emptyBasket();
+} else if (panier && panier.length >= 1) {
+  // Si notre panier comporte bien un produit on va déclencher la fonction qui va nous permettre de récupérer son prix
+  getPrice(panier);
 }
 // Avec cette vérification on cherche à s'assurer que le panier n'est pas vide
 function sortBasket(produits) {
-  console.log(produits);
+  // console.log(produits);
   if (produits !== null) {
     // On lui passe la fonction sort afin de trier les articles dans notre panier
     // par ordre alphabétique afin de regrouper entre eux les modèles de canapé
@@ -54,7 +53,6 @@ function sortBasket(produits) {
     })
     // une fois le panier trié on passe le résultat à notre fonction displayProductsOnBasket afin d'afficher le rendu
     displayProductsOnBasket(produits);
-    //  dans le cas contraire
   }
 }
 
@@ -88,10 +86,17 @@ function displayProductsOnBasket(produits) {
   // Et mettre à l'écoute les fonctions pour calculer le prix, changer la quantité, ainsi que supprimer un article
   calculatePrice();
   changeQuantity(produits);
-  deleteArticle();
+  deleteArticle(produits);
 }
 
 function emptyBasket() {
+    // dans le cas ou notre panier est existant, mais que sa longueur est de 0
+    if (panier && panier.length == 0) {
+      // On vide le localStorage
+      localStorage.clear();
+      // et on rafraîchit la page
+      window.location.reload();
+    }
   // Nous allons ici sélectionner la div parente #cartAndFormContainer et la stocké dans une variable
   let container = document.getElementById('cartAndFormContainer');
   // Créer un h2 et le stocké dans une variable que l'on appelera panierVide
@@ -110,8 +115,6 @@ function emptyBasket() {
 function calculatePrice() {
   // On définis le prix final de base à 0
   prixFinal = 0;
-  // On récupère le contenu de notre panier et on le stock dans une variable du même nom
-  // let newPanier = JSON.parse(localStorage.getItem("product"));
   // On va parcourir chacun des produits présents dans le panier
   if (produits !== null) {
     for (product of produits) {
@@ -166,14 +169,21 @@ function changeQuantity(produits) {
   });
 }
 
-
-function deleteArticle() {
+function deleteArticle(produits) {
   // ici on récupère le contenue de notre panier et on le stock dans un nouveau panier
   let nouveauPanier = JSON.parse(localStorage.getItem("product"));
+  // console.log("avant le sort", nouveauPanier)
+  // on va le trier afin que chaque index corresponde avec notre panier principal
+  nouveauPanier.sort(function compare(a, b) {
+    if (a.name < b.name)
+      return -1;
+    if (a.name > b.name)
+      return 1;
+    return 0;
+  })
+
   // Ici on va sélectionner toutes les balises deleteItem
   let buttonDelete = document.querySelectorAll('.deleteItem');
-  // On définit une variable qui va nous servir d'indice, sur 0
-  let indice = 0
   // On boucle pour écouter par la suite tous les boutons delete
   for (el of buttonDelete) {
     // Et être à l'écoute dans le cas ou l'on clic sur l'un d'entre eux
@@ -181,9 +191,9 @@ function deleteArticle() {
       // On va parcourir chaque élément présent dans notre panier
       panier = panier.map(element => {
         // Si un élément dans le panier a le même id et la même couleur que celui sur lequel nous avons cliqué pour le supprimer
-        if (element.id == el.dataset.id && element.color == el.dataset.color) {
+        if (element.id == e.target.dataset.id && element.color == e.target.dataset.color) {
           // On récupère l'index de l'élément en question
-          indice = panier.indexOf(element)
+          let indice = panier.indexOf(element)
           // on supprime l'élément grâce à son index dans notre nouveau panier
           nouveauPanier.splice(indice, 1);
           // Et on va expédier notre nouveau panier dans le localStorage
@@ -199,7 +209,7 @@ function deleteArticle() {
     }))
   }
   // dans le cas ou notre panier est existant, mais que sa longueur est de 0
-  if (panier && panier.length == 0) {
+  if (produits && produits.length == 0) {
     // On vide le localStorage
     localStorage.clear();
     // et on rafraîchit la page
