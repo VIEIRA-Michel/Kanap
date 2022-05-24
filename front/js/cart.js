@@ -1,53 +1,94 @@
 // Ici nous récupérons le contenu de notre localStorage et le stockons dans la variable 'panier'
 let panier = JSON.parse(localStorage.getItem("product"));
+let produits = [];
+// On récupère les données du panier pour les mettre dans notre variable produits;
+produits = panier;
 
+function getPrice(panier) {
+  // On définis une variable sur 0 qui nous permettra de déclencher par la suite 
+  // notre fonction qui nous permettra d'afficher les éléments une fois tous les prix récupérer
+  let i = 0;
+  // Pour chaque article présent dans notre panier
+  for (article of panier) {
+    // on va exécuter une requête fetch afin de récupérer son prix
+    fetch(`http://localhost:3000/api/products/${article.id}`)
+      .then((response) =>
+        response.json().then((data) => {
+          // Pour chaque 
+          for (product of produits) {
+            // On va assigner à chacun des produits leurs prix que l'on a récupéré depuis l'api
+            product.price = data.price;
+          }
+          // on incrémente la valeur de notre variable 'i'
+          i++
+          // Une fois que la valeur de notre variable 'i' est égal à la longueur de notre panier 
+          // on déclenche notre fonction qui va nous permettre de le trier
+          if (i == panier.length) {
+            sortBasket(produits)
+          }
+        }))
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+}
+// Si notre panier comporte bien un produit on va déclencher la fonction qui va nous permettre de récupérer son prix
+if (panier !== null) {
+  getPrice(panier);
+  // dans le cas contraire on va déclencher la fonction qui va nous afficher un message nous indiquant que notre panier est vide
+} else {
+  emptyBasket();
+}
 // Avec cette vérification on cherche à s'assurer que le panier n'est pas vide
-function verifyBasket(panier) {
-  if (panier !== null) {
+function sortBasket(produits) {
+  console.log(produits);
+  if (produits !== null) {
     // On lui passe la fonction sort afin de trier les articles dans notre panier
     // par ordre alphabétique afin de regrouper entre eux les modèles de canapé
-    panier.sort(function compare(a, b) {
+    produits.sort(function compare(a, b) {
       if (a.name < b.name)
         return -1;
       if (a.name > b.name)
         return 1;
       return 0;
-    });
+    })
     // une fois le panier trié on passe le résultat à notre fonction displayProductsOnBasket afin d'afficher le rendu
-    displayProductsOnBasket(panier);
+    displayProductsOnBasket(produits);
     //  dans le cas contraire
-  } else {
-    emptyBasket();
   }
 }
 
-function displayProductsOnBasket(panier) {
-  // S'il ne l'est pas nous allons boucler sur chaque article présent dedans
-  for (article of panier) {
+function displayProductsOnBasket(produits) {
+  // On va boucler sur chaque article présent dans notre panier 
+  for (article of produits) {
     // et incrémenter la div #cart__items de contenu html pré remplis avec les données de chacun des produits
     document.querySelector('#cart__items').innerHTML += `
-        <article class="cart__item" data-id="${article.id}" data-color="${article.color}">
-                    <div class="cart__item__img">
-                      <img src="${article.image}" alt="${article.alt}">
+      <article class="cart__item" data-id="${article.id}" data-color="${article.color}">
+                  <div class="cart__item__img">
+                    <img src="${article.image}" alt="${article.alt}">
+                  </div>
+                  <div class="cart__item__content">
+                    <div class="cart__item__content__description">
+                      <h2>${article.name}</h2>
+                      <p>${article.color}</p>
+                      <p>${article.price} €</p>
                     </div>
-                    <div class="cart__item__content">
-                      <div class="cart__item__content__description">
-                        <h2>${article.name}</h2>
-                        <p>${article.color}</p>
-                        <p>${article.price} €</p>
+                    <div class="cart__item__content__settings">
+                      <div class="cart__item__content__settings__quantity">
+                        <p>Qté : </p>
+                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
                       </div>
-                      <div class="cart__item__content__settings">
-                        <div class="cart__item__content__settings__quantity">
-                          <p>Qté : </p>
-                          <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${article.quantity}">
-                        </div>
-                        <div class="cart__item__content__settings__delete">
-                          <p class="deleteItem" data-id="${article.id}" data-color="${article.color}">Supprimer</p>
-                        </div>
+                      <div class="cart__item__content__settings__delete">
+                        <p class="deleteItem" data-id="${article.id}" data-color="${article.color}">Supprimer</p>
                       </div>
                     </div>
-                  </article>`
+                  </div>
+                </article>`
   }
+  // Et mettre à l'écoute les fonctions pour calculer le prix, changer la quantité, ainsi que supprimer un article
+  calculatePrice();
+  changeQuantity(produits);
+  deleteArticle();
 }
 
 function emptyBasket() {
@@ -64,24 +105,16 @@ function emptyBasket() {
   // On va sélectionner la balise contenant le prix et lui attribuer la valeur '0' étant donné que le panier est vide
   document.querySelector('#totalPrice').innerHTML = '0'
 }
-// On lance les fonctions qui vont nous permettre de vérifier si le panier est vide
-//  dans le cas contraire de le trier et celles afin de calculer le prix total de changer la quantité d'article 
-// et de supprimer des articles afin de pouvoir modifier dynamiquement l'affichage
-verifyBasket(panier);
-calculatePrice();
-changeQuantity();
-deleteArticle();
-
 
 // Cette fonction va nous permettre de calculer le prix total de tous les articles présents dans le panier
 function calculatePrice() {
   // On définis le prix final de base à 0
   prixFinal = 0;
   // On récupère le contenu de notre panier et on le stock dans une variable du même nom
-  let newPanier = JSON.parse(localStorage.getItem("product"));
+  // let newPanier = JSON.parse(localStorage.getItem("product"));
   // On va parcourir chacun des produits présents dans le panier
-  if (newPanier !== null) {
-    for (product of newPanier) {
+  if (produits !== null) {
+    for (product of produits) {
       // On crée une variable contenant un tableau vide qui contiendra la somme de chacun des canapés
       let priceTotal = []
       // On va ajouter a notre tableau le prix total de chacun des articles en multipliant leur prix par la quantité présente dans le panier
@@ -100,7 +133,7 @@ function calculatePrice() {
 // On crée une variable contenant un booléen qu'on définis sur false
 let modifQuantity = false;
 
-function changeQuantity() {
+function changeQuantity(produits) {
   // On sélectionne la carte dans son intégralité afin de récupérer les données des datasets
   const cards = document.querySelectorAll(".cart__item");
   // on va boucler sur 'cards' afin d'avoir accès à ses enfants
@@ -110,18 +143,24 @@ function changeQuantity() {
       // vérification d'information de la valeur du clic et son positionnement dans les articles
       let panier = JSON.parse(localStorage.getItem("product"));
       // boucle pour modifier la quantité du produit du panier grace à la nouvelle valeur
-      for (article of panier)
+      for (article of produits)
         if (
           article.id == card.dataset.id &&
           card.dataset.color == article.color
         ) {
+            for(element of panier) {
+              if (element.id == card.dataset.id && element.color == card.dataset.color) {
+                article.quantity = event.target.value;
+                element.quantity = article.quantity;
+              }
+            }
           // Nous allons appliqué directement dans l'article présent dans le localStorage
           // la nouvelle quantité que l'on a sélectionné
-          article.quantity = event.target.value;
-          // On va expédier dans le localStorage notre panier fraîchement modifié
+          // On va expédier dans le localSxtorage notre panier fraîchement modifié
           localStorage.setItem("product", JSON.stringify(panier));
           // puis recalculer le prix, car les quantités ont changé
           calculatePrice();
+          // window.location.reload();
         }
     });
   });
@@ -248,7 +287,7 @@ checkForEnableButton()
 form.order.addEventListener('click', (e => {
   // Éviter le rechargement de la page
   e.preventDefault()
-  // Et envoyer notre commande vers l'API
+  // Et envoyer notre commandes l'API
   SendCommand();
 }))
 

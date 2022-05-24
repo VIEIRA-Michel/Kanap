@@ -41,7 +41,7 @@ function displayProduct(data) {
         alt: altTxt,
         description: description,
         name: name,
-        price: price,
+        // price: price,
     }
 }
 
@@ -67,7 +67,7 @@ let addToCart = document.querySelector('#addToCart').addEventListener("click", f
 
 function addProduct(article) {
     let produitLocalStorage = JSON.parse(localStorage.getItem("product"));
-    console.log(article);
+    // console.log(article);
     if (article.color == undefined || article.quantity < 1) {
         alert("Merci de remplir tous les champs");
     } else if (produitLocalStorage) {
